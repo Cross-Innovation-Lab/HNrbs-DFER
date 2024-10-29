@@ -1,0 +1,132 @@
+
+seed: 42
+use_amp: False
+balance_sample: True
+mode: train
+gpu_ids: 0,1,2,3
+exam_dir: None
+use_ddp: False
+vis_s2d: True
+
+dataset:
+  name: DFEW
+  root: /dockerdata/
+  num_frames: 64
+  merge: 1
+  workers: 16
+  DFEW:
+    fold: 1
+    train_dataset: EmoLabel_DataSplit/train(single-labeled)/set_X.csv
+    test_dataset: EmoLabel_DataSplit/test(single-labeled)/set_X.csv
+  FERV39K:
+    train_dataset: FERV39K/FERV39k/4_setups/All_scenes/train_All.csv
+    test_dataset: FERV39K/FERV39k/4_setups/All_scenes/test_All.csv
+
+transform:
+  image_size: 112
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+
+model:
+  name: S2DFE_real
+  resume: 
+  backbone: tsm
+  clip_length: 4
+  S2D: True
+  S2D_real: True
+  S_frames: 16
+  D_frames: 16
+  S_bagsize: 16
+  D_bagsize: 4
+  stricts2d: True
+  share: True
+  share_fc: True
+  fuse: False
+  num_classes: 7
+  s2dattn: True
+  ezdelta: False
+  milpool: False
+  two_stage: False
+  two_stage_pro: False
+  s_only: False
+  d_only: False
+  same_input: False
+  params:
+    MIL: True
+    LSTM: True
+    MHSA: True
+    Norm: True
+    convPool: True
+  tsm:
+    MIL: False
+    base_model: resnet50
+  ki:
+    manual: False
+    manual_real: False
+    manual_top_4: True
+    manual_sign: False
+    delta_1: False
+    better_delta: False
+    sort: False
+
+
+optimizer:
+  name: AdamW
+  AdamW:
+    lr: 5e-4
+    min_lr: 5e-6
+    eps: 1e-8
+    weight_decay: 5e-2
+  SGD:
+    lr: 1e-2
+    min_lr: 1e-4
+    momentum: 0.9
+    weight_decay: 1e-4
+
+scheduler:
+  name: CosineLRScheduler
+  CosineLRScheduler:
+    two_stage_pm: False
+    warmup_epochs: 10
+    warmup_lr: 0.0
+  StepLRSchedule:
+    warmup_epochs: 10
+    decay_rate: 0.2
+    warmup_lr: 0.0
+  lambda_lr:
+    warmup_epochs: 10
+    warmup_lr: 0.0
+
+loss:
+  label_smoothing: 0.1
+  snet_bce_loss: 0.0
+  snet_ce_loss: 0.1
+  ial_loss: 0.0
+  synp_instance_ce_loss: 0.1
+  deta_instance_ce_loss: 0.1
+  key_instance_loss: 0.0
+  relabel: False
+  ki_ce_loss: 0.0
+
+augment:
+  random_sample: False
+  color_jitter: 0.4
+
+train:
+  epochs: 100
+  batch_size: 128
+  print_interval: 10
+  val_interval: 1
+
+val:
+  batch_size: 100
+
+test:
+  batch_size: 100
+
+wandb:
+  project: M3DFEL
+  save_code: True
+  name:
+  resume:
+  id:
